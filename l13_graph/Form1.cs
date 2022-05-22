@@ -84,12 +84,7 @@ namespace l13_graph
                 Gl.glVertex3d(1, 1, 1);
             Gl.glEnd();
 
-            // ?
-           /* Gl.glBegin(Gl.GL_LINES);
-                Gl.glColor3d(1.0, 0.5, 0.2);
-                Gl.glVertex3d(0, 0, 0);
-                Gl.glVertex3d(1, 1, 1);
-            Gl.glEnd();*/
+
             /*Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
             Gl.glLoadIdentity();
 
