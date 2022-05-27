@@ -17,12 +17,19 @@ namespace l13_graph
     public partial class Form1 : Form
     {
         private double angle;
+        bool changeAngle = false;
 
         int vertex = 0;    // идентификатор вершинного шейдера
         int fragment = 0;  // идентификатор фрагментного шейдера
         int program = 0;   // идентификатор программного объекта
 
+        // движение камеры
         double tX, tY, tZ;
+        int minXYZ = -5000;
+        int maxXYZ = 5000;
+        int modToDouble = 1000;
+
+        // тектура из изображения
         private int imageId;
         private uint mGlTextureObject;
         private bool textureIsLoad;
@@ -35,16 +42,35 @@ namespace l13_graph
             Resize(simpleOpenGlControl1.Width, simpleOpenGlControl1.Height);
             //LoadShadrers();
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            trackX.Minimum = minXYZ;
+            trackX.Maximum = maxXYZ;
+            tX = 0;
+            trackX.Value = 0;
+
+            trackY.Minimum = minXYZ;
+            trackY.Maximum = maxXYZ;
+            tY = -0.2;
+            trackY.Value = -200;
+
+            trackZ.Minimum = minXYZ;
+            trackZ.Maximum = maxXYZ;
+            tZ = -0.6;
+            trackZ.Value = -600;
+        }
+
         private static bool Init()
         {
+            //инициализация glut
             Glut.glutInit();
-
 
             // инициализация библиотеки openIL
             Il.ilInit();
             Il.ilEnable(Il.IL_ORIGIN_SET);
 
-
+            // инициализация Gl
             Gl.glEnable(Gl.GL_COLOR_MATERIAL);
             Gl.glShadeModel(Gl.GL_SMOOTH);
 
@@ -58,6 +84,76 @@ namespace l13_graph
 
             return true;
         }
+
+        private void Draw()
+        {
+            Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
+            Gl.glLoadIdentity();
+
+            Gl.glTranslated(tX, tY, tZ);
+            
+            Gl.glRotated(angle, 0, 1.0, 0);
+
+            Gl.glBegin(Gl.GL_LINES);
+                Gl.glColor3d(1.0, 0.0, 0.0);
+                Gl.glVertex3d(0, 0, 0);
+                Gl.glVertex3d(5, 0, 0);
+
+                Gl.glColor3d(0.0, 1.0, 0.0);
+                Gl.glVertex3d(0, 0, 0);
+                Gl.glVertex3d(0, 5, 0);
+
+                Gl.glColor3d(0.0, 0.0, 1.0);
+                Gl.glVertex3d(0, 0, 0);
+                Gl.glVertex3d(0, 0, 5);
+
+                /*Gl.glColor3d(0.0, 1.0, 1.0);
+                Gl.glVertex3d(0, 0, 0);
+                Gl.glVertex3d(1, 1, 1);*/
+            Gl.glEnd();
+
+            Gl.glBegin(Gl.GL_QUADS);
+                Gl.glColor3d(0.5, 0.5, 0.0);
+                Gl.glVertex3d(1, 1, 0);
+                Gl.glVertex3d(1, -1, 0);
+                Gl.glVertex3d(-1, -1, 0);
+                Gl.glVertex3d(-1, 1, 0);
+            Gl.glEnd();
+            
+            if (textureIsLoad)
+            {
+                // включаем режим текстурирования
+                Gl.glEnable(Gl.GL_TEXTURE_2D);
+                // включаем режим текстурирования , указывая индификатор mGlTextureObject
+                Gl.glBindTexture(Gl.GL_TEXTURE_2D, mGlTextureObject);
+
+                // текстурирование для сферы
+                Gl.glTexGeni(Gl.GL_S, Gl.GL_TEXTURE_GEN_MODE, Gl.GL_SPHERE_MAP);
+                Gl.glTexGeni(Gl.GL_T, Gl.GL_TEXTURE_GEN_MODE, Gl.GL_SPHERE_MAP);
+
+                // включение текстурирования для сферы
+                Gl.glEnable(Gl.GL_TEXTURE_GEN_S);
+                Gl.glEnable(Gl.GL_TEXTURE_GEN_T);
+
+                // рисование и удаление обькта сферы
+                Glu.GLUquadric q = Glu.gluNewQuadric();
+                Glu.gluSphere(q, 0.2, 50, 50);
+                Glu.gluDeleteQuadric(q);
+
+                // отключение текстурирования сферы
+                Gl.glDisable(Gl.GL_TEXTURE_GEN_S);
+                Gl.glDisable(Gl.GL_TEXTURE_GEN_T);
+
+                // отключаем режим текстурирования
+                Gl.glDisable(Gl.GL_TEXTURE_2D);
+            }
+        }
+
+        private void OpenGlControlPaint(object sender, PaintEventArgs e)
+        {
+            Draw();
+        }
+
         private static void Resize(int width, int height)
         {
             if (height == 0)
@@ -73,82 +169,13 @@ namespace l13_graph
             Gl.glLoadIdentity();
         }
 
-        private void Draw()
-        {
-            Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
-            Gl.glLoadIdentity();
-
-            Gl.glTranslated(tX, tY, tZ);
-            if(cbRotate.Checked)
-                Gl.glRotated(angle, 0.0, 1.0, 0.0);
-
-            Gl.glBegin(Gl.GL_LINES);
-                Gl.glColor3d(1.0, 0.0, 0.0);
-                Gl.glVertex3d(0, 0, 0);
-                Gl.glVertex3d(5, 0, 0);
-
-                Gl.glColor3d(0.0, 1.0, 0.0);
-                Gl.glVertex3d(0, 0, 0);
-                Gl.glVertex3d(0, 5, 0);
-
-                Gl.glColor3d(0.0, 0.0, 1.0);
-                Gl.glVertex3d(0, 0, 0);
-                Gl.glVertex3d(0, 0, 5);
-
-                Gl.glColor3d(0.0, 1.0, 1.0);
-                Gl.glVertex3d(0, 0, 0);
-                Gl.glVertex3d(1, 1, 1);
-            Gl.glEnd();
-
-            Gl.glBegin(Gl.GL_QUADS);
-            //Texture2D.LoadFromImage(string fileName)
-                Gl.glColor3d(0.5, 0.5, 0.0);
-                Gl.glVertex3d(-1, tY, -1);
-                Gl.glVertex3d(1, tY, -1);
-                Gl.glVertex3d(1, tY, 1);
-                Gl.glVertex3d(-1, tY, 1);
-            Gl.glEnd();
-            
-            if (textureIsLoad)
-            {
-                // включаем режим текстурирования
-                Gl.glEnable(Gl.GL_TEXTURE_2D);
-                // включаем режим текстурирования , указывая индификатор mGlTextureObject
-                Gl.glBindTexture(Gl.GL_TEXTURE_2D, mGlTextureObject);
-
-                
-                Glu.GLUquadric q = Glu.gluNewQuadric();
-                Glu.gluSphere(q, 0.2, 50, 50);
-                Glu.gluDeleteQuadric(q);
-
-                /*// отрисовываем полигон
-                Gl.glBegin(Gl.GL_QUADS);
-
-                // указываем поочередно вершины и текстурные координаты
-                Gl.glVertex3d(1, 1, 0);
-                Gl.glTexCoord2f(0, 0);
-                Gl.glVertex3d(1, 0, 0);
-                Gl.glTexCoord2f(1, 0);
-                Gl.glVertex3d(0, 0, 0);
-                Gl.glTexCoord2f(1, 1);
-                Gl.glVertex3d(0, 1, 0);
-                Gl.glTexCoord2f(0, 1);
-
-                // завершаем отрисовку
-                Gl.glEnd();*/
-
-                // отключаем режим текстурирования
-                Gl.glDisable(Gl.GL_TEXTURE_2D);
-            }
-        }
         private void TimerTick(object sender, EventArgs e)
         {
-            angle += 1.0;
+            if (changeAngle)
+            {
+                angle += 1.0;
+            }
             simpleOpenGlControl1.Invalidate();
-        }
-        private void OpenGlControlPaint(object sender, PaintEventArgs e)
-        {
-            Draw();
         }
 
         private void simpleOpenGlControl1_Resize(object sender, EventArgs e)
@@ -181,17 +208,17 @@ namespace l13_graph
 
         private void trackX_Scroll(object sender, EventArgs e)
         {
-            tX = (double)trackX.Value / 1000;
+            tX = (double)trackX.Value / modToDouble;
             lblX.Text = "X: " + tX.ToString();
         }
         private void trackY_Scroll(object sender, EventArgs e)
         {
-            tY = (double)trackY.Value / 1000;
+            tY = (double)trackY.Value / modToDouble;
             lblY.Text = "Y: " + tY.ToString();
         }
         private void trackZ_Scroll(object sender, EventArgs e)
         {
-            tZ = (double)trackZ.Value / 1000;
+            tZ = (double)trackZ.Value / modToDouble;
             lblZ.Text = "Z: " + tZ.ToString();
         }
 
@@ -243,22 +270,9 @@ namespace l13_graph
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void cbRotate_CheckedChanged(object sender, EventArgs e)
         {
-            trackX.Minimum = -1000;
-            trackX.Maximum = 1000;
-            tX = 0;
-            trackX.Value = 0;
-
-            trackY.Minimum = -1000;
-            trackY.Maximum = 1000;
-            tY = -0.2;
-            trackY.Value = -200;
-
-            trackZ.Minimum = -1000;
-            trackZ.Maximum = 1000;
-            tZ = -0.6;
-            trackZ.Value = -600;
+            changeAngle = !changeAngle;
         }
 
         // создание текстуры в панями openGL

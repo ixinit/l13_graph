@@ -32,7 +32,6 @@ namespace l13_graph
             this.components = new System.ComponentModel.Container();
             this.simpleOpenGlControl1 = new Tao.Platform.Windows.SimpleOpenGlControl();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.lblX = new System.Windows.Forms.Label();
             this.trackX = new System.Windows.Forms.TrackBar();
             this.trackY = new System.Windows.Forms.TrackBar();
@@ -138,6 +137,7 @@ namespace l13_graph
             this.cbRotate.TabIndex = 7;
             this.cbRotate.Text = "Вращать";
             this.cbRotate.UseVisualStyleBackColor = true;
+            this.cbRotate.CheckedChanged += new System.EventHandler(this.cbRotate_CheckedChanged);
             // 
             // btnImage
             // 
@@ -193,7 +193,6 @@ namespace l13_graph
 
         private Tao.Platform.Windows.SimpleOpenGlControl simpleOpenGlControl1;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.Timer timer2;
         private System.Windows.Forms.Label lblX;
         private System.Windows.Forms.TrackBar trackX;
         private System.Windows.Forms.TrackBar trackY;
